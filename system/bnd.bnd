@@ -1,0 +1,2 @@
+Private-Package: ap.test.akkasystem
+Bundle-Activator: ap.test.akkasystem.SharedSystem

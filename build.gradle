@@ -1,0 +1,80 @@
+/* Add bnd as a script dependency */
+buildscript {
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
+  dependencies {
+    classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.1.0'
+  }
+}
+
+ext {
+  akkaVersion = '2.4.8'
+}
+
+/* Configure the subprojects */
+subprojects {
+  version = '1.0.0'
+
+  apply plugin: 'scala'
+  apply plugin: 'biz.aQute.bnd.builder'
+
+  repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+      url "http://repository.springsource.com/maven/bundles/external"
+    }
+  }
+
+  configurations {
+    scala
+    osgi
+    akka
+    felix
+    bnd
+    launcher
+    webconsole
+    runFelix
+  }
+
+  dependencies {
+    scala   'org.scala-lang:scala-library:2.11.8'
+
+    osgi configurations.scala,
+            'org.osgi:org.osgi.core:5.0.0',
+            'org.osgi:org.osgi.compendium:5.0.0',
+            'org.apache.felix:org.apache.felix.scr:2.0.4'
+
+    akka "com.typesafe.akka:akka-osgi_2.11:$akkaVersion",
+         "com.typesafe.akka:akka-actor_2.11:$akkaVersion"
+
+    felix 'org.apache.felix:org.apache.felix.main:5.4.0'
+
+    bnd 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.1.0'
+
+    launcher 'ap.test:felix-launcher:1.0.0' //via mavenLocal from https://github.com/joune/felix-launcher
+
+    webconsole 'org.apache.commons:com.springsource.org.apache.commons.io:1.4.0',
+         'org.apache.commons:com.springsource.org.apache.commons.fileupload:1.2.0',
+         'org.json:com.springsource.org.json:1.0.0',
+         'org.apache.felix:org.apache.felix.shell:1.0.0',
+         'org.apache.felix:org.apache.felix.http.jetty:2.2.1',
+         'org.apache.felix:org.apache.felix.webconsole:4.2.0',
+         'org.apache.felix:org.apache.felix.webconsole.plugins.ds:2.0.2',
+         'org.apache.felix:org.apache.felix.inventory:1.0.4'
+
+
+    compile configurations.scala, configurations.osgi, configurations.akka, configurations.bnd
+
+    runFelix configurations.scala, configurations.osgi, configurations.akka, configurations.webconsole
+  }
+
+  task run(type: JavaExec, dependsOn: 'build') {
+    main 'ap.test.Launcher'
+    classpath ".", configurations.felix, configurations.scala, configurations.launcher
+    args configurations.runFelix
+  }
+
+}

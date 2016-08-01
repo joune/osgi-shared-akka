@@ -1,0 +1,2 @@
+Private-Package: ap.test.app1
+Service-Component: *
